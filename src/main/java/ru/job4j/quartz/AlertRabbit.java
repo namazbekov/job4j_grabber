@@ -2,10 +2,9 @@ package ru.job4j.quartz;
 
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 import static org.quartz.JobBuilder.*;
 import static org.quartz.TriggerBuilder.*;
@@ -17,7 +16,7 @@ public class AlertRabbit {
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
             JobDetail job = newJob(Rabbit.class).build();
-            Integer second = filter("data/rabbit.properties");
+            Integer second = filter("rabbit.properties");
             SimpleScheduleBuilder times = simpleSchedule()
                     .withIntervalInSeconds(second)
                     .repeatForever();
@@ -39,28 +38,16 @@ public class AlertRabbit {
     }
 
     public static Integer filter(String file) {
-        String line = null;
-        int second = 0;
-        try (BufferedReader in = new BufferedReader(new FileReader(file))) {
-            while ((line = in.readLine()) != null) {
-                if (line.isEmpty()) {
-                    throw new IllegalArgumentException("wrong string, string is empty");
-                }
-                if (!line.contains(".")) {
-                    throw new IllegalArgumentException("wrong string, string does not contain a dot");
-                }
-                if (!line.contains("=")) {
-                    throw new IllegalArgumentException("wrong string, string does not contain a equals");
-                }
-                if (line.startsWith(".")) {
-                    throw new IllegalArgumentException("wrong string, string doesn't start with a dot");
-                }
-                String[] array = line.split("=");
-                second = Integer.parseInt(array[array.length - 1]);
-            }
+        int second;
+        Properties properties = new Properties();
+        try (InputStream in =
+                     AlertRabbit.class.getClassLoader().getResourceAsStream(file)
+        ) {
+            properties.load(in);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new IllegalArgumentException();
         }
+        second = Integer.parseInt(properties.getProperty("rabbit.interval"));
         return second;
     }
 }
