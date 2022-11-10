@@ -4,6 +4,9 @@ import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import static org.quartz.JobBuilder.*;
@@ -13,9 +16,12 @@ import static org.quartz.SimpleScheduleBuilder.*;
 public class AlertRabbit {
     public static void main(String[] args) {
         try {
+            List<Long> store = new ArrayList<>();
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
-            JobDetail job = newJob(Rabbit.class).build();
+            JobDataMap data = new JobDataMap();
+            data.put("store", store);
+            JobDetail job = newJob(Rabbit.class).usingJobData(data).build();
             Properties properties = loadProperties("rabbit.properties");
             int second = Integer.parseInt(properties.getProperty("rabbit.interval"));
             SimpleScheduleBuilder times = simpleSchedule()
@@ -26,7 +32,26 @@ public class AlertRabbit {
                     .withSchedule(times)
                     .build();
             scheduler.scheduleJob(job, trigger);
-        } catch (SchedulerException se) {
+            try (Connection cnt = DriverManager.getConnection(
+                    properties.getProperty("url"),
+                    properties.getProperty("username"),
+                    properties.getProperty("password")
+            )) {
+                Statement statement = cnt.createStatement();
+                if (!statement.isClosed()) {
+                    System.out.println("Connection successfully!!!");
+                }
+                String sql = "create table rabbit(id serial primary key, created_date varchar(255))";
+                statement.execute(sql);
+//                try (PreparedStatement preparedStatement = cnt.prepareStatement(sql)) {
+//                    preparedStatement.execute();
+//                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            Thread.sleep(10000);
+            scheduler.shutdown();
+        } catch (SchedulerException | InterruptedException se) {
             se.printStackTrace();
         }
     }
@@ -35,6 +60,8 @@ public class AlertRabbit {
         @Override
         public void execute(JobExecutionContext context) {
             System.out.println("Rabbit runs here ...");
+            List<Long> store = (List<Long>) context.getJobDetail().getJobDataMap().get("store");
+            store.add(System.currentTimeMillis());
         }
     }
 
