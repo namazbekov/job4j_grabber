@@ -43,9 +43,6 @@ public class AlertRabbit {
                 }
                 String sql = "create table rabbit(id serial primary key, created_date varchar(255))";
                 statement.execute(sql);
-//                try (PreparedStatement preparedStatement = cnt.prepareStatement(sql)) {
-//                    preparedStatement.execute();
-//                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
