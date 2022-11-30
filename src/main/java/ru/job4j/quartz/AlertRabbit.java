@@ -4,6 +4,7 @@ import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ConnectException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,11 @@ public class AlertRabbit {
             data.put("store", store);
             JobDetail job = newJob(Rabbit.class).usingJobData(data).build();
             Properties properties = loadProperties("rabbit.properties");
+                try (Connection cn = connection(properties)) {
+                    data.put("store", cn);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             int second = Integer.parseInt(properties.getProperty("rabbit.interval"));
             SimpleScheduleBuilder times = simpleSchedule()
                     .withIntervalInSeconds(second)
@@ -32,20 +38,6 @@ public class AlertRabbit {
                     .withSchedule(times)
                     .build();
             scheduler.scheduleJob(job, trigger);
-            try (Connection cnt = DriverManager.getConnection(
-                    properties.getProperty("url"),
-                    properties.getProperty("username"),
-                    properties.getProperty("password")
-            )) {
-                Statement statement = cnt.createStatement();
-                if (!statement.isClosed()) {
-                    System.out.println("Connection successfully!!!");
-                }
-                String sql = "create table rabbit(id serial primary key, created_date varchar(255))";
-                statement.execute(sql);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
             Thread.sleep(10000);
             scheduler.shutdown();
         } catch (SchedulerException | InterruptedException se) {
@@ -57,8 +49,14 @@ public class AlertRabbit {
         @Override
         public void execute(JobExecutionContext context) {
             System.out.println("Rabbit runs here ...");
-            List<Long> store = (List<Long>) context.getJobDetail().getJobDataMap().get("store");
-            store.add(System.currentTimeMillis());
+            Connection connection = (Connection) context.getJobDetail().getJobDataMap().get("store");
+            try (PreparedStatement statement = connection.prepareStatement("insert into rabbit(create_date)" +
+                    "values(?)")) {
+                statement.setString(1, String.valueOf(System.currentTimeMillis()));
+                statement.execute();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -72,5 +70,13 @@ public class AlertRabbit {
             throw new IllegalArgumentException();
         }
         return properties;
+    }
+
+    public static Connection connection(Properties properties) throws SQLException {
+        return DriverManager.getConnection(
+                properties.getProperty("url"),
+                properties.getProperty("username"),
+                properties.getProperty("password")
+        );
     }
 }
