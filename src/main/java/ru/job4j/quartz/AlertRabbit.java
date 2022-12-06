@@ -15,12 +15,11 @@ public class AlertRabbit {
         try {
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
             scheduler.start();
-            JobDataMap data = new JobDataMap();
-            JobDetail job = newJob(Rabbit.class).usingJobData(data).build();
             Properties properties = loadProperties("rabbit.properties");
+            JobDataMap data = new JobDataMap();
                 try (Connection cn = getConnection(properties)) {
-                    job.getJobDataMap().put("connection", cn);
-
+                    data.put("connection", cn);
+                    JobDetail job = newJob(Rabbit.class).usingJobData(data).build();
             int second = Integer.parseInt(properties.getProperty("rabbit.interval"));
             SimpleScheduleBuilder times = simpleSchedule()
                     .withIntervalInSeconds(second)
