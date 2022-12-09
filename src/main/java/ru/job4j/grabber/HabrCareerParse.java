@@ -23,7 +23,7 @@ public class HabrCareerParse {
             Element dateElement = row.select(".vacancy-card__date").first();
             Element linkElement = titleElement.child(0);
             String vacancyName = titleElement.text();
-            String dateDrop = String.valueOf(dateElement.getElementsByAttribute("datetime"));
+            var dateDrop = dateElement.getElementsByAttribute("datetime");
             String link = String.format("%s%s", SOURCE_LINK, linkElement.attr("href"));
             System.out.printf("%s %s %s%n", dateDrop, vacancyName, link);
         });
