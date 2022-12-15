@@ -9,7 +9,13 @@ public class HabrCareerDateTimeParser implements DateTimeParser {
 
     @Override
     public LocalDateTime parse(String parses) throws ParseException {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'Т'HH:mm:ss");
-        return LocalDateTime.parse(parses, formatter);
+
+        ZonedDateTime time = ZonedDateTime.parse(parses);
+        return time.toLocalDateTime();
+    }
+
+    public static void main(String[] args) throws ParseException {
+        HabrCareerDateTimeParser habrCareerDateTimeParser = new HabrCareerDateTimeParser();
+        habrCareerDateTimeParser.parse("2022-12-12T15:59:57+03:00");
     }
 }
