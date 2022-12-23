@@ -11,6 +11,21 @@ public class Post {
     private String description;
     private LocalDateTime create;
 
+    public Post(int id, String tittle, String link, String description, LocalDateTime create) {
+        this.id = id;
+        this.tittle = tittle;
+        this.link = link;
+        this.description = description;
+        this.create = create;
+    }
+
+    public Post(String tittle, String link, String description, LocalDateTime create) {
+        this.tittle = tittle;
+        this.link = link;
+        this.description = description;
+        this.create = create;
+    }
+
     public int getId() {
         return id;
     }
@@ -51,20 +66,6 @@ public class Post {
         this.create = create;
     }
 
-    public Post(int id, String tittle, String link, String description, LocalDateTime create) {
-        this.id = id;
-        this.tittle = tittle;
-        this.link = link;
-        this.description = description;
-        this.create = create;
-    }
-
-    public Post(String tittle, String link, String description, LocalDateTime create) {
-        this.tittle = tittle;
-        this.link = link;
-        this.description = description;
-        this.create = create;
-    }
 
     @Override
     public boolean equals(Object o) {
