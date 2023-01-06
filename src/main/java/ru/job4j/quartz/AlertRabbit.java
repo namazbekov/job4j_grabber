@@ -43,7 +43,10 @@ public class AlertRabbit {
         @Override
         public void execute(JobExecutionContext context) {
             System.out.println("Rabbit runs here ...");
-            Connection connection = (Connection) context.getJobDetail().getJobDataMap().get("connection");
+            Connection connection = (Connection) context
+                    .getJobDetail()
+                    .getJobDataMap()
+                    .get("connection");
             try {
                 if (connection.isClosed()) {
                     System.out.println("Disconnection!!!!!!");
