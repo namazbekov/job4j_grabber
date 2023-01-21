@@ -35,13 +35,13 @@ public class HabrCareerParse implements Parse {
     }
 
     @Override
-    public List<Post> list(String PAGE_LINK) {
+    public List<Post> list(String firstLink) {
         List<Post> list = new ArrayList<>();
         for (int i = 1; i <= 5; i++) {
             System.out.println("Page: " + i);
             try {
                 String pageLink1 =
-                        String.format("%s/"+ PAGE_LINK + i, SOURCE_LINK);
+                        String.format("%s/" + firstLink + i, SOURCE_LINK);
                 String pageLink = String.format(pageLink1);
                 Connection connection = Jsoup.connect(pageLink);
                 Document document = connection.get();
