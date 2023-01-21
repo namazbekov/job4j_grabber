@@ -6,9 +6,5 @@ import java.util.List;
 
 public interface Parse {
 
-    List<Post> list(
-            String firstLink, String title,
-            String link, String description,
-            LocalDateTime time
-    ) throws IOException;
+    List<Post> list(String link) throws IOException;
 }
