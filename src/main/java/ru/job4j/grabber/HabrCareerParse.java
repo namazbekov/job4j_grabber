@@ -12,11 +12,14 @@ import java.util.List;
 
 public class HabrCareerParse implements Parse {
 
+    private static final int LAST_PAGE = 5;
+
     private static final String SOURCE_LINK = "https://career.habr.com";
 
-    private static final String PAGE_LINK = "vacancies/java_developer?page= ";
+    private static final String PAGE_LINK =
+            "https://career.habr.com/vacancies/java_developer?page= ";
 
-    private static DateTimeParser dateTimeParser = null;
+    private DateTimeParser dateTimeParser;
 
     public HabrCareerParse(DateTimeParser dateTimeParser) {
         this.dateTimeParser = dateTimeParser;
@@ -24,24 +27,29 @@ public class HabrCareerParse implements Parse {
 
     public static void main(String[] args) {
         HabrCareerParse habrCareerParse = new HabrCareerParse(new HabrCareerDateTimeParser());
-        System.out.println(habrCareerParse.list(PAGE_LINK));
+        habrCareerParse.list(PAGE_LINK);
     }
 
-    private static String retrieveDescription(String link) throws IOException {
+    private static String retrieveDescription(String link) {
         Connection connection = Jsoup.connect(link);
-        Document document = connection.get();
+        Document document;
+        try {
+            document = connection.get();
+        } catch (IOException e) {
+            throw new IllegalArgumentException();
+        }
         Element vacancyDescription = document.select(".style-ugc").first();
-        return String.format("%s %s%n", "Описание вакансии :", vacancyDescription.text());
+        return vacancyDescription.text();
     }
 
     @Override
     public List<Post> list(String firstLink) {
         List<Post> list = new ArrayList<>();
-        for (int i = 1; i <= 5; i++) {
+        for (int i = 1; i <= LAST_PAGE; i++) {
             System.out.println("Page: " + i);
             try {
                 String pageLink1 =
-                        String.format("%s/" + firstLink + i, SOURCE_LINK);
+                        String.format("%s%d", firstLink, i);
                 String pageLink = String.format(pageLink1);
                 Connection connection = Jsoup.connect(pageLink);
                 Document document = connection.get();
@@ -56,14 +64,10 @@ public class HabrCareerParse implements Parse {
                     newFormatDate = dateTimeParser.parse(dateDrop);
                     String link = String.format("%s%s", SOURCE_LINK, linkElement.attr("href"));
                     System.out.printf("%s %s %s%n", newFormatDate, vacancyName, link);
-                    try {
-                        String description = retrieveDescription(link);
-                        System.out.println(description);
-                        Post post = new Post(vacancyName, link, description, newFormatDate);
-                        list.add(post);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    String description = retrieveDescription(link);
+                    System.out.println(description);
+                    Post post = new Post(vacancyName, link, description, newFormatDate);
+                    list.add(post);
                 });
             } catch (IOException e) {
                 e.printStackTrace();
