@@ -46,7 +46,6 @@ public class HabrCareerParse implements Parse {
     public List<Post> list(String firstLink) {
         List<Post> list = new ArrayList<>();
         for (int i = 1; i <= LAST_PAGE; i++) {
-            System.out.println("Page: " + i);
             try {
                 String pageLink1 =
                         String.format("%s%d", firstLink, i);
@@ -63,14 +62,12 @@ public class HabrCareerParse implements Parse {
                     LocalDateTime newFormatDate;
                     newFormatDate = dateTimeParser.parse(dateDrop);
                     String link = String.format("%s%s", SOURCE_LINK, linkElement.attr("href"));
-                    System.out.printf("%s %s %s%n", newFormatDate, vacancyName, link);
                     String description = retrieveDescription(link);
-                    System.out.println(description);
                     Post post = new Post(vacancyName, link, description, newFormatDate);
                     list.add(post);
                 });
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new IllegalArgumentException();
             }
         }
         return list;
