@@ -89,7 +89,7 @@ public class Post {
                 + "id=" + id + ", tittle='" + tittle + '\''
                 + ", link='" + link + '\''
                 + ", description='" + description + '\''
-                + ", create=" + create
+                + ", created=" + create
                 + '}';
     }
 }
