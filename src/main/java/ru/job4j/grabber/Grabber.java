@@ -51,7 +51,9 @@ public class Grabber implements Grab {
             Store store = (Store) map.get("store");
             Parse parse = (Parse) map.get("parse");
             try {
-                List<Post> list = parse.list("https://career.habr.com/vacancies/java_developer?page=");
+                List<Post> list = parse.list(
+                        "https://career.habr.com/vacancies/java_developer?page="
+                );
                 for (Post array : list) {
                     store.save(array);
                 }
@@ -60,7 +62,6 @@ public class Grabber implements Grab {
             }
         }
     }
-
 
     public static void main(String[] args) throws Exception {
         var cfg = new Properties();
