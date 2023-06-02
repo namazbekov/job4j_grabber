@@ -2,10 +2,7 @@ package ru.job4j.grabber;
 
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
-import ru.job4j.grabber.HabrCareerDateTimeParser;
-
 import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
