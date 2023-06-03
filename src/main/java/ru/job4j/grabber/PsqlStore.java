@@ -39,6 +39,7 @@ public class PsqlStore implements Store {
             statement.setString(2, post.getLink());
             statement.setString(3, post.getDescription());
             statement.setTimestamp(4, Timestamp.valueOf(post.getCreate()));
+            statement.execute();
             try (ResultSet resultSet = statement.getGeneratedKeys()) {
                 if (resultSet.next()) {
                     result = resultSet.getInt(1) > 0;
